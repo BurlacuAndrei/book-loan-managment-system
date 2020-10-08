@@ -1,0 +1,17 @@
+To start the project you need to follow the instructions below:
+
+1. Import project into Eclipse JEE 
+
+2. open docker folder under project root folder and run command below to start mysql database in docker (Docker need to be installed on system)
+
+docker-compose up -d
+
+3. run db.sql file on the newly created database (this could be done from mysql-cli or from MySQL Workbench or DBeaver (db managment applications))
+
+4. Rigth-click on project root folder and choose option Run as -> Run on server (you need to have Apache TomCat installed on you system, recomended version 9.0)
+
+5. After application is deployed on server, open http://localhost:8080/BookLoanManagmentSystem/ to start using the web application.
+
+6. There is already one admin user and one simple user that can be found in database table 'user'
+
+Good luck ;) 

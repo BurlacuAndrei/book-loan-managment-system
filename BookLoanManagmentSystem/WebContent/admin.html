@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <meta charset="ISO-8859-1">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+      <title>Admin Page</title>
+      <style>
+         body {font-family: Arial, Helvetica, sans-serif;}
+         form {border: 3px solid #f1f1f1;}
+         input[type=text], input[type=password], input[type=number] {
+         width: 100%;
+         padding: 12px 20px;
+         margin: 8px 0;
+         display: inline-block;
+         border: 1px solid #ccc;
+         box-sizing: border-box;
+         }
+         button {
+         background-color: #4CAF50;
+         color: white;
+         padding: 14px 20px;
+         margin: 8px 0;
+         border: none;
+         cursor: pointer;
+         width: 100%;
+         }
+         button:hover {
+         opacity: 0.8;
+         }
+         .cancelbtn {
+         width: auto;
+         padding: 10px 18px;
+         background-color: #f44336;
+         }
+         .imgcontainer {
+         text-align: center;
+         margin: 24px 0 12px 0;
+         }
+         img.avatar {
+         width: 40%;
+         border-radius: 50%;
+         max-width:25%;
+         max-height:25%;
+         }
+         .container {
+         padding: 16px;
+         }
+         span.psw {
+         float: right;
+         padding-top: 16px;
+         }
+         /* Change styles for span and cancel button on extra small screens */
+         @media screen and (max-width: 300px) {
+         span.psw {
+         display: block;
+         float: none;
+         }
+         .cancelbtn {
+         width: 100%;
+         }
+         }
+         table {
+         font-family: arial, sans-serif;
+         border-collapse: collapse;
+         width: 100%;
+         }
+         td, th {
+         border: 1px solid #dddddd;
+         text-align: left;
+         padding: 8px;
+         }
+         tr:nth-child(even) {
+         background-color: #dddddd;
+         }
+      </style>
+   </head>
+   <body>
+      <h1>Admin Page</h1>
+      <section>
+         <h2>All books</h2>
+         <table id="allBooks">
+            <thead>
+               <tr>
+                  <th>Book id</th>
+                  <th>Book Title</th>
+                  <th>Authors</th>
+                  <th>Publisher</th>
+                  <th>Published years</th>
+                  <th>Total pages</th>
+                  <th>Book status</th>
+               </tr>
+            </thead>
+            <tbody id="body">
+            </tbody>
+         </table>
+      </section>
+      <section>
+         <h2>Add/Update book</h2>
+         <form>
+            <div class="container">
+               <label for="bookId"><b>Book Id</b></label>
+               <input type="number" placeholder="Enter Book Id" id="bookId" name="bookId">
+               <small>*specify Book Id field just for book update</small><br>
+               <label for="bookTitle"><b>Book Title</b></label>
+               <input type="text" placeholder="Enter Book Title" id="bookTitle" name="bookTitle" required>
+               <label for="authors"><b>Authors</b></label>
+               <input type="text" placeholder="Enter Authors" id="authors" name="authors" required>
+               <label for="publisher"><b>Publisher</b></label>
+               <input type="text" placeholder="Enter Publisher" id="publisher" name="publisher" required>
+               <label for="publishedYear"><b>Published Year</b></label>
+               <input type="number" placeholder="Enter Published Year" id="publishedYear" name="publishedYear" required>
+               <label for="totalPagesOfTheBook"><b>Total pages of the book</b></label>
+               <input type="number" placeholder="Enter Total pages of the book" id="totalPagesOfTheBook" name="totalPagesOfTheBook" required>
+               <label for="bookStatus"><b>Status</b></label>
+               <select id="bookStatus" name="bookStatus">
+                  <option value="LOAN">LOAN</option>
+                  <option value="REQUESTED">REQUESTED</option>
+                  <option value="SHELF" selected>SHELF</option>
+               </select>
+               <button id="save" type="button">Save</button>
+            </div>
+         </form>
+      </section>
+      <section>
+         <h2>Delete a book by id</h2>
+         <form>
+            <div class="container">
+               <label for="deleteBookId"><b>Book Id</b></label>
+               <input type="number" placeholder="Enter Book Id" id="deleteBookId" name="deleteBookId" required>
+            </div>
+            <button id="delete" type="button">Delete</button>
+         </form>
+      </section>
+      <section>
+         <h2>LogOut</h2>
+         <form>
+            <button id="logout" type="button">Log out</button>
+         </form>
+      </section>
+      <script type="text/javascript">
+         function getCookie(cname) {
+           var name = cname + "=";
+           var ca = document.cookie.split(';');
+           for(var i = 0; i < ca.length; i++) {
+             var c = ca[i];
+             while (c.charAt(0) == ' ') {
+               c = c.substring(1);
+             }
+             if (c.indexOf(name) == 0) {
+               return c.substring(name.length, c.length);
+             }
+           }
+           return "";
+         }
+         function setCookie(cname, cvalue, exdays) {
+           var d = new Date();
+           d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+           var expires = "expires="+d.toUTCString();
+           document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+         }
+         function eraseCookie(name) {
+         	setCookie(name, "", -1);
+         }
+         $( document ).ready(function() {
+         
+         	redirect();
+         	getAllBooks(null, null);
+         });
+         $(document).ready(function(){
+           $("#logout").click(function(){
+             eraseCookie('userId');
+             eraseCookie('isAdmin');
+             redirect();
+           });
+         });
+         $(document).ready(function(){
+           $("#save").click(function(){
+             $.post("/BookLoanManagmentSystem/book",
+             {
+             	bookId: $('#bookId').val(),
+             	bookTitle: $('#bookTitle').val(),
+             	authors: $('#authors').val(),
+             	publisher: $('#publisher').val(),
+             	publishedYear: $('#publishedYear').val(),
+             	totalPagesOfTheBook: $('#totalPagesOfTheBook').val(),
+             	bookStatus: $('#bookStatus option:selected').text()
+             },
+             function(data,status){
+             	if (status === 'success') {
+         
+             		getAllBooks(null, null);
+                 }  else {
+         
+           			alert("There was an error on saving/updating the book !");
+               	}
+             });
+           });
+         });
+         $(document).ready(function(){
+         	  $("#delete").click(function(){
+         		let data = {"deleteBookId":$('#deleteBookId').val()}
+         	    $.ajax({
+         		    url: "/BookLoanManagmentSystem/book?" + $.param(data),
+         		    type: "DELETE"
+         	    }).done(function(result) {
+         		    
+         	    	getAllBooks(null, null);
+         		}).fail(function(result){
+         			alert("Fail to delete the book !");
+         		});
+         	  });
+         	});
+         
+         function redirect() {
+         
+           var isAdmin = getCookie("isAdmin");
+           if (isAdmin != "") {
+         
+         	  if (isAdmin == false) {
+         
+         	  	location.replace("./book_loan.html");
+           	  }
+           } else {
+         
+         	  location.replace("./login.html");
+           }
+         }
+         function getAllBooks (bookId, bookTitle) {
+         
+             $.get("/BookLoanManagmentSystem/book",
+          	    {
+          	      bookId: bookId,
+          	      bookTitle: bookTitle
+          	    },
+          	    function(data,status){
+          	 	    
+          	    	if (status === 'success') {
+         
+          	    		writeTable(data);
+          	      	} 
+          	    });
+         }
+         function writeTable(array) {
+         	$('#allBooks tbody').empty();
+             var tbody = $('#body');
+             for (var i = 0; i < array.length; i++) {
+                 var tr = $('<tr/>').appendTo(tbody);
+                 tr.append('<td>' + array[i].bookId + '</td>');
+                 tr.append('<td>' + array[i].bookTitle + '</td>');
+                 tr.append('<td>' + array[i].authors + '</td>');
+                 tr.append('<td>' + array[i].publisher + '</td>');
+                 tr.append('<td>' + array[i].publishedYear + '</td>');
+                 tr.append('<td>' + array[i].totalPagesOfTheBook + '</td>');
+                 tr.append('<td>' + array[i].bookStatus + '</td>');
+             }
+         }
+      </script>
+   </body>
+</html>
